@@ -8,6 +8,8 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * JPA's criteria API is a good alternative to JPA expressions, but is spoiled by too much boilerplace to set a
@@ -98,5 +100,26 @@ public class Querying {
                 final Root<RootModel> root,
                 final CriteriaQuery<Result> resultQuery
         );
+    }
+
+    /**
+     * Get a single result, which is either missing or present. The caller is declaring that more than 1 result should
+     * not happen, in which case an {@link MoreThanOneResultException} is thrown.
+     */
+    @Nonnull
+    public static <A> Optional<A> zeroOrOne(TypedQuery<A> x) {
+        List<A> results = x.setMaxResults(2).getResultList();
+        final Optional<A> result;
+        switch (results.size()) {
+            case 0:
+                result = Optional.empty();
+                break;
+            case 1:
+                result = Optional.of(results.get(0));
+                break;
+            default:
+                throw new MoreThanOneResultException(x);
+        }
+        return result;
     }
 }
