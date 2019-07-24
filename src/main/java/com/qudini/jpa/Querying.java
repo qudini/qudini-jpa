@@ -5,9 +5,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,14 +43,14 @@ public class Querying {
      */
     @Nonnull
     public static <RootModel, Result> TypedQuery<Result> query(
-            final EntityManager entityManager,
-            final Class<RootModel> rootModel,
-            final Class<Result> resultModel,
-            final QueryAction<RootModel, Result> query
+            EntityManager entityManager,
+            Class<RootModel> rootModel,
+            Class<Result> resultModel,
+            QueryAction<RootModel, Result> query
     ) {
-        final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        final CriteriaQuery<Result> resultQuery = builder.createQuery(resultModel);
-        final Root<RootModel> root = resultQuery.from(rootModel);
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Result> resultQuery = builder.createQuery(resultModel);
+        Root<RootModel> root = resultQuery.from(rootModel);
 
         return entityManager.createQuery(query.query(builder, root, resultQuery));
     }
@@ -82,24 +80,22 @@ public class Querying {
      */
     @Nonnull
     public static <A> TypedQuery<A> query(
-            final EntityManager entityManager,
-            final Class<A> model,
-            final QueryAction<A, A> query
+            EntityManager entityManager,
+            Class<A> model,
+            QueryAction<A, A> query
     ) {
         return query(entityManager, model, model, query);
     }
 
-    @FunctionalInterface
-    @ParametersAreNonnullByDefault
-    @CheckReturnValue
-    public interface QueryAction<RootModel, Result> {
-
-        @Nonnull
-        CriteriaQuery<Result> query(
-                final CriteriaBuilder builder,
-                final Root<RootModel> root,
-                final CriteriaQuery<Result> resultQuery
-        );
+    public static <A> int update(
+            EntityManager entityManager,
+            Class<A> rootClass,
+            UpdateAction<A> updateAction
+    ) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaUpdate<A> update = builder.createCriteriaUpdate(rootClass);
+        Root<A> root = update.from(rootClass);
+        return entityManager.createQuery(updateAction.query(builder, root, update)).executeUpdate();
     }
 
     /**
@@ -121,5 +117,53 @@ public class Querying {
                 throw new MoreThanOneResultException(x);
         }
         return result;
+    }
+
+    public static <A> int delete(
+            EntityManager entityManager,
+            Class<A> rootClass,
+            DeleteAction<A> deleteAction
+    ) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaDelete<A> update = builder.createCriteriaDelete(rootClass);
+        Root<A> root = update.from(rootClass);
+        return entityManager.createQuery(deleteAction.query(builder, root, update)).executeUpdate();
+    }
+
+    @FunctionalInterface
+    @ParametersAreNonnullByDefault
+    @CheckReturnValue
+    public interface QueryAction<RootModel, Result> {
+
+        @Nonnull
+        CriteriaQuery<Result> query(
+                CriteriaBuilder builder,
+                Root<RootModel> root,
+                CriteriaQuery<Result> resultQuery
+        );
+    }
+
+    @FunctionalInterface
+    @ParametersAreNonnullByDefault
+    @CheckReturnValue
+    public interface UpdateAction<RootModel> {
+        @Nonnull
+        CriteriaUpdate<RootModel> query(
+                CriteriaBuilder builder,
+                Root<RootModel> root,
+                CriteriaUpdate<RootModel> update
+        );
+    }
+
+    @FunctionalInterface
+    @ParametersAreNonnullByDefault
+    @CheckReturnValue
+    public interface DeleteAction<RootModel> {
+        @Nonnull
+        CriteriaUpdate<RootModel> query(
+                CriteriaBuilder builder,
+                Root<RootModel> root,
+                CriteriaDelete<RootModel> update
+        );
     }
 }
