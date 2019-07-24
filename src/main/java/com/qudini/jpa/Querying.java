@@ -98,6 +98,17 @@ public class Querying {
         return entityManager.createQuery(updateAction.query(builder, root, update)).executeUpdate();
     }
 
+    public static <A> int delete(
+            EntityManager entityManager,
+            Class<A> rootClass,
+            DeleteAction<A> deleteAction
+    ) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaDelete<A> update = builder.createCriteriaDelete(rootClass);
+        Root<A> root = update.from(rootClass);
+        return entityManager.createQuery(deleteAction.query(builder, root, update)).executeUpdate();
+    }
+
     /**
      * Get a single result, which is either missing or present. The caller is declaring that more than 1 result should
      * not happen, in which case an {@link MoreThanOneResultException} is thrown.
@@ -117,17 +128,6 @@ public class Querying {
                 throw new MoreThanOneResultException(x);
         }
         return result;
-    }
-
-    public static <A> int delete(
-            EntityManager entityManager,
-            Class<A> rootClass,
-            DeleteAction<A> deleteAction
-    ) {
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        CriteriaDelete<A> update = builder.createCriteriaDelete(rootClass);
-        Root<A> root = update.from(rootClass);
-        return entityManager.createQuery(deleteAction.query(builder, root, update)).executeUpdate();
     }
 
     @FunctionalInterface
