@@ -11,13 +11,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
-    <distributionManagement>
-        <repository>
-            <id>bintray-qudini-qudini-maven</id>
-            <name>qudini-qudini-maven</name>
-            <url>https://api.bintray.com/maven/qudini/qudini-maven/qudini-jpa/;publish=1</url>
-        </repository>
-    </distributionManagement>
+  <distributionManagement>
+    <repository>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>central</id>
+      <name>Qudini-releases</name>
+      <url>https://qudini.jfrog.io/artifactory/qudini-maven-local</url>
+    </repository>
+  </distributionManagement>
     <scm>
         <developerConnection>scm:git:git@github.com:qudini/qudini-jpa.git</developerConnection>
         <connection>scm:git:git@github.com:qudini/qudini-jpa.git</connection>
