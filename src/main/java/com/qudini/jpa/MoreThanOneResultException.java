@@ -1,8 +1,9 @@
 package com.qudini.jpa;
 
-import javax.persistence.TypedQuery;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.TypedQuery;
 
-public class MoreThanOneResultException extends javax.persistence.PersistenceException {
+public class MoreThanOneResultException extends PersistenceException {
 
     MoreThanOneResultException(TypedQuery<?> erroneousQuery) {
         super("only 0 or 1 results are accepted from query " + erroneousQuery);
